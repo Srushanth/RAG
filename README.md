@@ -20,10 +20,11 @@ This report provides critical insights into trends, challenges, and opportunitie
 
 ## 🧰 Tech Stack
 
-- Python  
-- LlamaIndex  
-- Vector DB: TODO  
-- OpenAI / Hugging Face models  
+- Python
+- [`uv`](https://github.com/astral-sh/uv) package manager
+- LlamaIndex
+- Vector DB: TODO
+- OpenAI / Hugging Face models
 - Streamlit / Gradio (optional for UI)
 
 ## 📦 Getting Started
