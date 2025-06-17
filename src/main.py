@@ -20,10 +20,37 @@ Notes:
 Ensure all dependencies are installed before execution.
 """
 
+from typing import List
+from llama_index.core import Settings
+from llama_index.llms.openai import OpenAI
+from llama_index.core.schema import Document
+from llama_index.core import VectorStoreIndex
+from llama_index.core import SimpleDirectoryReader
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core.base.base_query_engine import BaseQueryEngine
 
-def main():
+
+def load_embeddings() -> HuggingFaceEmbedding:
+    """Load and return the HuggingFace embeddings."""
+    return HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+
+
+def main() -> None:
     """Main function to execute the program."""
-    print("Hello, World!")
+    print("Initializing the application...")
+    Settings.llm = OpenAI(model="gpt-3.5-turbo", temperature=0.0)
+    print("Loading embeddings...")
+    Settings.embed_model = load_embeddings()
+    print("Loading documents...")
+    documents: List[Document] = SimpleDirectoryReader(input_dir="data").load_data()
+    index: VectorStoreIndex = VectorStoreIndex.from_documents(documents)
+    query_engine: BaseQueryEngine = index.as_query_engine()
+    while True:
+        query: str = input("Enter your query: ")
+        if query.lower() == "exit":
+            break
+        response = query_engine.query(query)
+        print(f"Response: {response}")
 
 
 if __name__ == "__main__":
