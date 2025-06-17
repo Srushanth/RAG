@@ -26,7 +26,7 @@ from llama_index.llms.openai import OpenAI
 from llama_index.core.schema import Document
 from llama_index.core import VectorStoreIndex
 from llama_index.core import SimpleDirectoryReader
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding  # type: ignore
 from llama_index.core.base.base_query_engine import BaseQueryEngine
 
 
