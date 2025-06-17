@@ -3,6 +3,7 @@
         "BAAI",
         "Baride",
         "huggingface",
+        "llms",
         "Streamlit"
     ]
 }
