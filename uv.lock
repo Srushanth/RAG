@@ -630,6 +630,19 @@ wheels = [
 ]
 
 [[package]]
+name = "llama-index-llms-ollama"
+version = "0.6.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "llama-index-core" },
+    { name = "ollama" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/84/77/b2a7b93fb5680fd8daf71ab23de45723dca602b1fff0907fb47bb79ca598/llama_index_llms_ollama-0.6.2.tar.gz", hash = "sha256:1be4081f0ba9c9dd3b5d270c2e8009c256b3b6a1312cb38a0c724dba8bac1304", size = 8441, upload-time = "2025-06-07T15:35:36.925Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/aa/3a/49ad5945316be3dfaafc0f3d2c10c95fabd74aa5c7209f8d9ee89c91f76b/llama_index_llms_ollama-0.6.2-py3-none-any.whl", hash = "sha256:b714311c3a1e3e5c9d9d2a46c1c12cc3e6865e8b81f1863412da41c1725a1144", size = 8137, upload-time = "2025-06-07T15:35:35.584Z" },
+]
+
+[[package]]
 name = "llama-index-llms-openai"
 version = "0.4.7"
 source = { registry = "https://pypi.org/simple" }
@@ -1024,6 +1037,19 @@ wheels = [
 ]
 
 [[package]]
+name = "ollama"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8d/96/c7fe0d2d1b3053be614822a7b722c7465161b3672ce90df71515137580a0/ollama-0.5.1.tar.gz", hash = "sha256:5a799e4dc4e7af638b11e3ae588ab17623ee019e496caaf4323efbaa8feeff93", size = 41112, upload-time = "2025-05-30T21:32:48.679Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d6/76/3f96c8cdbf3955d7a73ee94ce3e0db0755d6de1e0098a70275940d1aff2f/ollama-0.5.1-py3-none-any.whl", hash = "sha256:4c8839f35bc173c7057b1eb2cbe7f498c1a7e134eafc9192824c8aecb3617506", size = 13369, upload-time = "2025-05-30T21:32:47.429Z" },
+]
+
+[[package]]
 name = "openai"
 version = "1.88.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1262,18 +1288,16 @@ name = "rag"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "certifi" },
     { name = "llama-index" },
     { name = "llama-index-embeddings-huggingface" },
-    { name = "llama-index-llms-openai" },
+    { name = "llama-index-llms-ollama" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "certifi", specifier = ">=2025.6.15" },
     { name = "llama-index", specifier = ">=0.12.42" },
     { name = "llama-index-embeddings-huggingface", specifier = ">=0.5.4" },
-    { name = "llama-index-llms-openai", specifier = ">=0.4.7" },
+    { name = "llama-index-llms-ollama", specifier = ">=0.6.2" },
 ]
 
 [[package]]
