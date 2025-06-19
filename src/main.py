@@ -22,7 +22,7 @@ Ensure all dependencies are installed before execution.
 
 from typing import List
 from llama_index.core import Settings
-from llama_index.llms.openai import OpenAI
+from llama_index.llms.ollama import Ollama  # type: ignore
 from llama_index.core.schema import Document
 from llama_index.core import VectorStoreIndex
 from llama_index.core import SimpleDirectoryReader
@@ -38,7 +38,7 @@ def load_embeddings() -> HuggingFaceEmbedding:
 def main() -> None:
     """Main function to execute the program."""
     print("Initializing the application...")
-    Settings.llm = OpenAI(model="gpt-3.5-turbo", temperature=0.0)
+    Settings.llm = Ollama(model="gemma3:1b", request_timeout=60.0)
     print("Loading embeddings...")
     Settings.embed_model = load_embeddings()
     print("Loading documents...")
