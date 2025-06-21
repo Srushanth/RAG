@@ -11,7 +11,7 @@ executes core logic, and manages application flow.
 
 Usage:
 Run this script using:
-    python main.py
+    python src/main.py
 
 Functions:
 - main(): Initializes and runs the program.
@@ -20,6 +20,7 @@ Notes:
 Ensure all dependencies are installed before execution.
 """
 
+import logging
 from typing import List
 from llama_index.core import Settings
 from llama_index.llms.ollama import Ollama  # type: ignore
@@ -28,6 +29,15 @@ from llama_index.core import VectorStoreIndex
 from llama_index.core import SimpleDirectoryReader
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding  # type: ignore
 from llama_index.core.base.base_query_engine import BaseQueryEngine
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+
+logger = logging.getLogger(__name__)
 
 
 def load_embeddings() -> HuggingFaceEmbedding:
