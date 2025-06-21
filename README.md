@@ -33,14 +33,14 @@ This report provides critical insights into trends, challenges, and opportunitie
 
 ### 1. Install uv Package Manager
 
-#### Windows
+#### Windows (uv)
 
 ```powershell
 # Using PowerShell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-#### macOS
+#### macOS (uv)
 
 ```bash
 # Using Homebrew
@@ -50,7 +50,7 @@ brew install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-#### Linux
+#### Linux (uv)
 
 ```bash
 # Using curl
@@ -62,7 +62,7 @@ pip install uv
 
 ### 2. Install Ollama
 
-#### Windows
+#### Windows (Ollama)
 
 1. Download Ollama from [https://ollama.com/download](https://ollama.com/download)
 2. Run the installer
@@ -72,7 +72,7 @@ pip install uv
 ollama pull gemma2:2b
 ```
 
-#### macOS
+#### macOS (Ollama)
 
 ```bash
 # Using Homebrew
@@ -83,7 +83,7 @@ brew install ollama
 ollama pull gemma2:2b
 ```
 
-#### Linux
+#### Linux (Ollama)
 
 ```bash
 # Install Ollama
@@ -104,7 +104,7 @@ cd <your-repo-name>
 
 ### 2. Create Virtual Environment with uv
 
-#### Windows (PowerShell/Command Prompt)
+#### Windows (PowerShell/Command Prompt) (venv)
 
 ```powershell
 # Create virtual environment
@@ -117,7 +117,7 @@ uv venv
 .venv\Scripts\activate.bat
 ```
 
-#### macOS/Linux
+#### macOS/Linux (venv)
 
 ```bash
 # Create virtual environment
