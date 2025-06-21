@@ -288,6 +288,7 @@ return HuggingFaceEmbedding(model_name="your-preferred-embedding-model")
 ## 📝 Logging
 
 The application uses colorful logging with the following color scheme:
+
 - 🟢 **Green**: INFO messages
 - 🟡 **Yellow**: WARNING messages
 - 🔴 **Red**: ERROR messages
