@@ -2,10 +2,12 @@
     "cSpell.words": [
         "BAAI",
         "Baride",
+        "colorlog",
         "huggingface",
         "levelname",
         "llms",
         "Ollama",
-        "Streamlit"
+        "Streamlit",
+        "venv"
     ]
 }
