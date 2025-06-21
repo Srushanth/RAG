@@ -22,6 +22,7 @@ Ensure all dependencies are installed before execution.
 
 import logging
 from typing import List
+import colorlog
 from llama_index.core import Settings
 from llama_index.llms.ollama import Ollama  # type: ignore
 from llama_index.core.schema import Document
@@ -30,11 +31,24 @@ from llama_index.core import SimpleDirectoryReader
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding  # type: ignore
 from llama_index.core.base.base_query_engine import BaseQueryEngine
 
-
+console_handler = colorlog.StreamHandler()
+console_handler.setFormatter(
+    colorlog.ColoredFormatter(
+        "%(log_color)s%(asctime)s - %(levelname)s - %(message)s",
+        # datefmt="%Y-%m-%d %H:%M:%S",
+        log_colors={
+            "DEBUG": "cyan",
+            "INFO": "green",
+            "WARNING": "yellow",
+            "ERROR": "red",
+            "CRITICAL": "red,bg_white",
+        },
+    )
+)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()],
+    handlers=[console_handler],
 )
 
 logger = logging.getLogger(__name__)
