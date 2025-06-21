@@ -58,7 +58,7 @@ def load_embeddings() -> HuggingFaceEmbedding:
     """Load and return the HuggingFace embeddings.
 
     Returns:
-        HuggingFaceEmbedding: _description_
+        HuggingFaceEmbedding: A configured HuggingFace embedding instance for text vectorization.
     """
     return HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
