@@ -98,8 +98,8 @@ ollama pull gemma2:2b
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
-cd <your-repo-name>
+git clone https://github.com/Srushanth/RAG
+cd RAG
 ```
 
 ### 2. Create Virtual Environment with uv
@@ -131,7 +131,7 @@ source .venv/bin/activate
 
 ```bash
 # Install project dependencies
-uv pip install llama-index-core llama-index-llms-ollama llama-index-embeddings-huggingface colorlog
+uv sync
 ```
 
 ### 4. Download the PDF Document
@@ -217,11 +217,10 @@ Enter your query: exit
 ```bash
 project-root/
 ├── src/
-│   └── main.py          # Main application entry point
+│   └── main.py         # Main application entry point
 ├── data/
 │   └── ey-india-energy-sector-at-cross-roads.pdf  # PDF document
-├── .venv/               # Virtual environment (created by uv)
-├── application.log      # Application logs (created at runtime)
+├── .venv/              # Virtual environment (created by uv)
 └── README.md           # This file
 ```
 
@@ -264,7 +263,7 @@ project-root/
 
    ```bash
    # Reinstall dependencies
-   uv pip install --upgrade llama-index-core llama-index-llms-ollama llama-index-embeddings-huggingface colorlog
+   uv sync
    ```
 
 ## 🔧 Configuration
