@@ -3,6 +3,7 @@
         "BAAI",
         "Baride",
         "huggingface",
+        "levelname",
         "llms",
         "Ollama",
         "Streamlit"
