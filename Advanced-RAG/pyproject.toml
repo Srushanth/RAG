@@ -8,6 +8,7 @@ dependencies = [
     "llama-index-core>=0.14.21",
     "llama-index-embeddings-huggingface>=0.7.0",
     "llama-index-llms-google-genai>=0.9.1",
+    "mlflow>=3.11.1",
     "streamlit>=1.56.0",
     "torch>=2.11.0",
     "torchvision>=0.26.0",
