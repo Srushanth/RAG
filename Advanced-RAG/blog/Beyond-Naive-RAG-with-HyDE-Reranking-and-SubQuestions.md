@@ -17,6 +17,32 @@ However, as you scale up your documents or face more complex user queries, Naive
 
 To solve these issues, I set up a new lab environment to experiment with three **Advanced RAG** techniques: **HyDE**, **Re-ranking**, and the **Sub-Question Engine**.
 
+Here is a high-level architecture diagram showing where each of these techniques can be injected into the standard RAG pipeline:
+
+```mermaid
+flowchart TD
+    Q[User Query] --> Processing[Query Processing]
+    
+    subgraph Pre-Retrieval
+        Processing -.->|Complex| SubQ[Sub-Question Engine]
+        Processing -.->|Abstract| HyDE[HyDE Transform]
+    end
+    
+    SubQ --> VDB[(Vector Database)]
+    HyDE --> VDB
+    Processing -->|Direct| VDB
+    
+    subgraph Post-Retrieval
+        VDB -->|Top K Results| Reranker[Cross-Encoder Re-ranker]
+    end
+    
+    Reranker -->|Top N Results| LLM[LLM Synthesis]
+    LLM --> Ans[Final Answer]
+
+    classDef technique fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000;
+    class SubQ,HyDE,Reranker technique;
+```
+
 ---
 
 ## The Baseline Setup
