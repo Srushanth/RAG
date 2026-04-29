@@ -7,7 +7,7 @@ description: "A deep dive into three advanced Retrieval-Augmented Generation tec
 
 # Beyond Naive RAG: Leveling up with HyDE, Re-ranking, and Sub-Questions
 
-In a [previous post](Building-a-Naive-RAG-Application-from-Scratch-with-LlamaIndex-and-Gemini.md), I walked through the process of building a foundational "Naive RAG" application from scratch using LlamaIndex and Google's Gemini. That pipeline was simple and effective: load documents, embed them into a vector database, and perform a basic similarity search to retrieve context for the LLM.
+In a [previous post](https://gen-lang-client-0570044087-8ff3f.web.app/blog/post?slug=Building-a-Naive-RAG-Application-from-Scratch-with-LlamaIndex-and-Gemini), I walked through the process of building a foundational "Naive RAG" application from scratch using LlamaIndex and Google's Gemini. That pipeline was simple and effective: load documents, embed them into a vector database, and perform a basic similarity search to retrieve context for the LLM.
 
 However, as you scale up your documents or face more complex user queries, Naive RAG starts to show its limitations:
 
