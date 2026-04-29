@@ -7,9 +7,10 @@ description: "A deep dive into three advanced Retrieval-Augmented Generation tec
 
 # Beyond Naive RAG: Leveling up with HyDE, Re-ranking, and Sub-Questions
 
-In a [previous post](Building-a-Naive-RAG-Application-from-Scratch-with-LlamaIndex-and-Gemini.md), I walked through the process of building a foundational "Naive RAG" application from scratch using LlamaIndex and Google's Gemini. That pipeline was simple and effective: load documents, embed them into a vector database, and perform a basic similarity search to retrieve context for the LLM. 
+In a [previous post](Building-a-Naive-RAG-Application-from-Scratch-with-LlamaIndex-and-Gemini.md), I walked through the process of building a foundational "Naive RAG" application from scratch using LlamaIndex and Google's Gemini. That pipeline was simple and effective: load documents, embed them into a vector database, and perform a basic similarity search to retrieve context for the LLM.
 
 However, as you scale up your documents or face more complex user queries, Naive RAG starts to show its limitations:
+
 - **Vocabulary Mismatch:** The words in the user's short query might not match the terminology used in the dense documents.
 - **Lost in the Middle:** Retrieving too many chunks introduces noise, but retrieving too few risks missing the answer.
 - **Complex Questions:** Simple similarity search fails when a question requires aggregating information from multiple distinct parts of the document.
@@ -44,12 +45,14 @@ With the baseline running, it was time to experiment.
 ## Technique 1: HyDE (Hypothetical Document Embeddings)
 
 ### The Problem
+
 When a user asks a short, abstract question (e.g., "What is the company's stance on remote work?"), the raw vector of that question might not semantically match the dense, formal policy text inside the employee handbook.
 
 ### The HyDE Solution
-HyDE flips the script: before doing any retrieval, it asks the LLM to write a *fake, hypothetical answer* to the user's question based entirely on its pre-trained knowledge. Even if this fake answer contains hallucinations or is factually wrong, its *semantic structure and vocabulary* will closely mirror the actual document we are trying to find! 
 
-We then embed this hypothetical answer and use *that* to search the vector database.
+HyDE flips the script: before doing any retrieval, it asks the LLM to write a _fake, hypothetical answer_ to the user's question based entirely on its pre-trained knowledge. Even if this fake answer contains hallucinations or is factually wrong, its _semantic structure and vocabulary_ will closely mirror the actual document we are trying to find!
+
+We then embed this hypothetical answer and use _that_ to search the vector database.
 
 ```python
 from llama_index.core.indices.query.query_transform import HyDEQueryTransform
@@ -71,9 +74,11 @@ response = hyde_query_engine.query("What is the company's stance on remote work?
 ## Technique 2: Re-ranking with Cross-Encoders
 
 ### The Problem
+
 Standard vector search uses "bi-encoders" which pre-calculate vectors for documents and queries independently and compare them via dot-product. It's incredibly fast, but misses subtle semantic nuances. If we retrieve 10 documents, the #1 result isn't always the most relevant.
 
 ### The Re-ranking Solution
+
 Instead of relying solely on the initial retrieval, we can use a **Cross-Encoder**. A cross-encoder takes the query and a document chunk simultaneously and scores their relevance together. It's too slow to run across your entire database, but perfect for re-scoring the top-10 results from a fast vector search.
 
 I used `BAAI/bge-reranker-v2-m3`, a powerful local reranker that runs without an API key.
@@ -98,12 +103,15 @@ rerank_engine = index.as_query_engine(
 ## Technique 3: The Sub-Question Query Engine
 
 ### The Problem
-If a user asks, *"Compare the Q1 revenue of Apple to the Q1 revenue of Microsoft,"* standard RAG fails. A single similarity search cannot pull completely disconnected financial data for two different companies reliably.
+
+If a user asks, _"Compare the Q1 revenue of Apple to the Q1 revenue of Microsoft,"_ standard RAG fails. A single similarity search cannot pull completely disconnected financial data for two different companies reliably.
 
 ### The Sub-Question Solution
-The Sub-Question Engine intercepts the complex query and uses the LLM to decompose it into independent, actionable sub-questions. 
-1. *What was Apple's Q1 revenue?*
-2. *What was Microsoft's Q1 revenue?*
+
+The Sub-Question Engine intercepts the complex query and uses the LLM to decompose it into independent, actionable sub-questions.
+
+1. _What was Apple's Q1 revenue?_
+2. _What was Microsoft's Q1 revenue?_
 
 It then executes these sub-queries in parallel against your tools, gathers the distinct answers, and synthesizes a final comparative response.
 
@@ -137,13 +145,13 @@ sub_question_engine = SubQuestionQueryEngine.from_defaults(
 
 Each technique serves a specific purpose in a production RAG pipeline:
 
-| Technique | Best For | Trade-off |
-|-----------|----------|----------|
-| **Baseline** | Simple, well-formed queries | Fast, but struggles with noise and complex logic |
-| **HyDE** | Short/abstract queries, vocabulary mismatch | Slight latency bump (Extra LLM call) |
-| **Re-ranking** | Improving precision from noisy retrieval | Extra model inference overhead |
-| **Sub-Question** | Complex, multi-part, or comparative questions | Slowest (Multiple LLM calls & retrieval passes) |
+| Technique        | Best For                                      | Trade-off                                        |
+| ---------------- | --------------------------------------------- | ------------------------------------------------ |
+| **Baseline**     | Simple, well-formed queries                   | Fast, but struggles with noise and complex logic |
+| **HyDE**         | Short/abstract queries, vocabulary mismatch   | Slight latency bump (Extra LLM call)             |
+| **Re-ranking**   | Improving precision from noisy retrieval      | Extra model inference overhead                   |
+| **Sub-Question** | Complex, multi-part, or comparative questions | Slowest (Multiple LLM calls & retrieval passes)  |
 
-Building advanced RAG isn't about applying every technique simultaneously—it's about understanding the specific failure modes of your naive architecture and applying the right tool for the job. 
+Building advanced RAG isn't about applying every technique simultaneously it's about understanding the specific failure modes of your naive architecture and applying the right tool for the job.
 
 Whether it's bridging a vocabulary gap with HyDE, boosting precision with a Re-ranker, or breaking down analytical problems with Sub-Questions, LlamaIndex makes it incredibly straightforward to evolve your pipeline.
