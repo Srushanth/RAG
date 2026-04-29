@@ -7,6 +7,8 @@ description: "A deep dive into three advanced Retrieval-Augmented Generation tec
 
 # Beyond Naive RAG: Leveling up with HyDE, Re-ranking, and Sub-Questions
 
+![Advanced RAG Hero Banner](https://storage.googleapis.com/portfolio-srushanth-baride-images/Beyond-Naive-RAG-with-HyDE-Reranking-and-SubQuestions/landing-image.png)
+
 In a [previous post](https://gen-lang-client-0570044087-8ff3f.web.app/blog/post?slug=Building-a-Naive-RAG-Application-from-Scratch-with-LlamaIndex-and-Gemini), I walked through the process of building a foundational "Naive RAG" application from scratch using LlamaIndex and Google's Gemini. That pipeline was simple and effective: load documents, embed them into a vector database, and perform a basic similarity search to retrieve context for the LLM.
 
 However, as you scale up your documents or face more complex user queries, Naive RAG starts to show its limitations:
@@ -80,6 +82,8 @@ HyDE flips the script: before doing any retrieval, it asks the LLM to write a _f
 
 We then embed this hypothetical answer and use _that_ to search the vector database.
 
+![HyDE Concept](https://storage.googleapis.com/portfolio-srushanth-baride-images/Beyond-Naive-RAG-with-HyDE-Reranking-and-SubQuestions/HyDE-Hypothetical-Document-Embeddings-Concept.png)
+
 ```python
 from llama_index.core.indices.query.query_transform import HyDEQueryTransform
 from llama_index.core.query_engine import TransformQueryEngine
@@ -108,6 +112,8 @@ Standard vector search uses "bi-encoders" which pre-calculate vectors for docume
 Instead of relying solely on the initial retrieval, we can use a **Cross-Encoder**. A cross-encoder takes the query and a document chunk simultaneously and scores their relevance together. It's too slow to run across your entire database, but perfect for re-scoring the top-10 results from a fast vector search.
 
 I used `BAAI/bge-reranker-v2-m3`, a powerful local reranker that runs without an API key.
+
+![Cross-Encoder Re-ranking Process](https://storage.googleapis.com/portfolio-srushanth-baride-images/Beyond-Naive-RAG-with-HyDE-Reranking-and-SubQuestions/Cross-Encoder-Re-ranking-Process.png)
 
 ```python
 from llama_index.postprocessor.sbert_rerank import SentenceTransformerRerank
@@ -140,6 +146,8 @@ The Sub-Question Engine intercepts the complex query and uses the LLM to decompo
 2. _What was Microsoft's Q1 revenue?_
 
 It then executes these sub-queries in parallel against your tools, gathers the distinct answers, and synthesizes a final comparative response.
+
+![Sub-Question Decomposition](https://storage.googleapis.com/portfolio-srushanth-baride-images/Beyond-Naive-RAG-with-HyDE-Reranking-and-SubQuestions/Sub-Question-Decomposition.png)
 
 ```python
 from llama_index.core.query_engine import SubQuestionQueryEngine
