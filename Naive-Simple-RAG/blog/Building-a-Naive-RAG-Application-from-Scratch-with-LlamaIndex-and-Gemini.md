@@ -1,7 +1,7 @@
 ---
 title: "Building a Naive RAG Application from Scratch with LlamaIndex and Gemini"
 date: "2026-04-22"
-tags: ["AI", "RAG", "LlamaIndex", "Streamlit", "LLM", "Python"]
+tags: ["AI", "RAG", "LlamaIndex", "Streamlit", "LLM", "Python", "Gemini"]
 description: "A step-by-step journey of building a local document chatbot, from a Jupyter Notebook proof-of-concept to a fully interactive Streamlit web application."
 ---
 
