@@ -1,43 +1,47 @@
 ---
-title: "Breaking the Monolith: Embracing Modular RAG Architectures"
+title: "Breaking the Monolith: Embracing Modular RAG with Workflows"
 date: "2026-05-01"
 tags: ["AI", "RAG", "LlamaIndex", "Modular RAG", "Python", "Gemini", "Machine Learning"]
-description: "A deep dive into transitioning from rigid RAG implementations to highly scalable and customizable Modular RAG pipelines using LlamaIndex QueryPipelines."
+description: "A deep dive into transitioning from rigid RAG implementations to highly scalable and customizable event-driven Modular RAG architectures using LlamaIndex Workflows."
 ---
 
-# Breaking the Monolith: Embracing Modular RAG Architectures
+# Breaking the Monolith: Embracing Modular RAG with Workflows
 
 ![Modular RAG Architecture](https://storage.googleapis.com/portfolio-srushanth-baride-images/Modular-RAG-A-Flexible-Pipeline-Architecture/landing-image.png)
 
 In the rapidly evolving world of Large Language Models, the initial approach to Retrieval-Augmented Generation (RAG) was often monolithic. We would load our documents, build a simple index, and let a high-level wrapper handle the rest. While "Naive RAG" is fantastic for prototyping, it becomes a bottleneck as your application scales in complexity.
 
-What happens when you need to swap your vector database? Or introduce a re-ranker? Or conditionally route queries based on their intent?
+What happens when you need to swap your vector database? Or introduce a conditionally routing agent? Or build self-correcting loops when retrieval fails?
 
-Enter **Modular RAG**. Modular RAG isn't a single technique; it's an architectural paradigm shift. It breaks the retrieval and generation process into distinct, interoperable modules. This allows developers to construct highly customized pipelines tailored exactly to their use cases.
+Enter **Modular RAG**. Modular RAG isn't a single technique; it's an architectural paradigm shift. It breaks the retrieval and generation process into distinct, interoperable modules. 
 
-Here is a conceptual look at how a Modular RAG architecture replaces the monolithic approach:
+Recently, LlamaIndex made a huge shift to support this paradigm natively by deprecating rigid `QueryPipelines` and introducing **`Workflows`**: an event-driven framework perfect for scalable, modular RAG.
+
+Here is a conceptual look at how an Event-Driven Workflow replaces the monolithic approach:
 
 ```mermaid
-flowchart LR
-    Query([User Query]) --> Retriever[Retrieval Module]
+flowchart TD
+    Query([User Query]) --> Start[StartEvent]
     
-    subgraph Modular Pipeline
-        Retriever --> Formatter[Node Formatter]
-        Formatter --> Prompt[Prompt Template]
-        Prompt --> LLM[Generation Module]
+    subgraph Modular Workflow
+        Start -->|Trigger| RetrieverStep[Retrieval Module / Step]
+        RetrieverStep -->|Emit| RetEvent[RetrievalEvent]
+        RetEvent -->|Trigger| SynthesizerStep[Synthesis Module / Step]
     end
     
-    LLM --> Answer([Final Response])
+    SynthesizerStep -->|Emit| Stop[StopEvent]
+    Stop --> Answer([Final Response])
     
     %% Optional modules
-    Retriever -.- Reranker[Re-ranker Module]
-    Reranker -.- Formatter
+    RetrieverStep -.->|Emit| RerankEvent[RerankEvent]
+    RerankEvent -.->|Trigger| RerankerStep[Re-ranker Module]
+    RerankerStep -.->|Emit| RetEvent
     
     classDef core fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000;
-    classDef opt fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5,color:#000;
+    classDef evt fill:#fff3e0,stroke:#f57c00,stroke-width:2px,stroke-dasharray: 5 5,color:#000;
     
-    class Retriever,Formatter,Prompt,LLM core;
-    class Reranker opt;
+    class RetrieverStep,SynthesizerStep,RerankerStep core;
+    class Start,RetEvent,Stop,RerankEvent evt;
 ```
 
 ---
@@ -55,7 +59,7 @@ response = query_engine.query("What are the environmental goals?")
 
 This is incredibly powerful, but much of the logic—how the nodes are formatted, the exact prompt being used, the ordering of operations—is hidden under the hood. 
 
-Let's break this monolith apart using LlamaIndex's `QueryPipeline`.
+Let's break this monolith apart using LlamaIndex's event-driven **`Workflows`**.
 
 ---
 
@@ -80,72 +84,92 @@ index = VectorStoreIndex(nodes)
 
 ---
 
-## 2. Defining the Modules
+## 2. Defining Custom Events
 
-Next, we define the individual components that will make up our pipeline. We need a retriever, a prompt template, and a utility function to format our retrieved nodes.
+In an event-driven architecture, components communicate by passing state via `Event` objects. We need an event to carry the retrieved context from our Retriever Module to our Synthesis Module.
 
 ```python
+from llama_index.core.workflow import Event
+
+class RetrievalEvent(Event):
+    """Event containing the retrieved nodes and the original query."""
+    nodes: list
+    query: str
+```
+
+---
+
+## 3. Orchestrating with Workflows
+
+This is the heart of modern Modular RAG. We create a class inheriting from `Workflow` and use the `@step` decorator to define isolated modules that listen for and emit specific events.
+
+```python
+from llama_index.core.workflow import Workflow, StartEvent, StopEvent, step
 from llama_index.core import PromptTemplate
-from llama_index.core.query_pipeline import FnComponent
 
-# Module 1: The Retriever
-retriever = index.as_retriever(similarity_top_k=3)
+class ModularRAGWorkflow(Workflow):
+    def __init__(self, index, llm, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.index = index
+        self.llm = llm
+        
+        # Define our Prompt Template module
+        prompt_str = (
+            "Context information is below.\n"
+            "---------------------\n"
+            "{context_str}\n"
+            "---------------------\n"
+            "Given the context information, answer the user's query.\n"
+            "Query: {query_str}\n"
+            "Answer: "
+        )
+        self.prompt_tmpl = PromptTemplate(prompt_str)
 
-# Module 2: The Prompt Template
-prompt_str = (
-    "Context information is below.\n"
-    "---------------------\n"
-    "{context_str}\n"
-    "---------------------\n"
-    "Given the context information, answer the user's query.\n"
-    "Query: {query_str}\n"
-    "Answer: "
-)
-prompt_tmpl = PromptTemplate(prompt_str)
+    @step
+    async def retrieve(self, ev: StartEvent) -> RetrievalEvent:
+        """Module 1: The Retrieval Step."""
+        query = ev.query
+        
+        retriever = self.index.as_retriever(similarity_top_k=3)
+        nodes = await retriever.aretrieve(query)
+        
+        # Emit our custom event
+        return RetrievalEvent(nodes=nodes, query=query)
 
-# Module 3: A Utility Formatter
-def format_nodes(nodes):
-    return "\n\n".join([n.get_content() for n in nodes])
-
-format_nodes_c = FnComponent(fn=format_nodes)
+    @step
+    async def synthesize(self, ev: RetrievalEvent) -> StopEvent:
+        """Module 2: The Synthesis Step."""
+        # Format the retrieved nodes into a single string
+        context_str = "\n\n".join([n.get_content() for n in ev.nodes])
+        
+        # Format the prompt using our template
+        formatted_prompt = self.prompt_tmpl.format(
+            context_str=context_str,
+            query_str=ev.query
+        )
+        
+        # Call the LLM Module
+        response = await self.llm.acomplete(formatted_prompt)
+        
+        # Return the final result
+        return StopEvent(result=str(response))
 ```
 
----
-
-## 3. Orchestrating with QueryPipeline
-
-This is the heart of Modular RAG. We use `QueryPipeline` to declaratively link our independent modules together. The output of one module becomes the input to the next.
+To run this pipeline, we simply call:
 
 ```python
-from llama_index.core.query_pipeline import QueryPipeline
-
-# Initialize the pipeline
-p = QueryPipeline(verbose=True)
-
-# Register our modules
-p.add_modules({
-    "retriever": retriever,
-    "format_nodes": format_nodes_c,
-    "prompt_tmpl": prompt_tmpl,
-    "llm": Settings.llm
-})
-
-# Define the DAG (Directed Acyclic Graph) of data flow
-p.add_link("retriever", "format_nodes")
-p.add_link("format_nodes", "prompt_tmpl", dest_key="context_str")
-p.add_link("prompt_tmpl", "llm")
+workflow = ModularRAGWorkflow(index=index, llm=Settings.llm)
+result = await workflow.run(query="What are Apple's 2030 environmental goals?")
 ```
-
-When we run `p.run(query_str="...")`, the pipeline automatically handles routing the query string to any module that expects an input. The retriever uses the query to find nodes, the nodes are formatted, injected into the prompt alongside the original query, and passed to the LLM.
 
 ---
 
-## Why Modular RAG Matters
+## Why Event-Driven Modular RAG Matters
 
 The code above achieves the exact same result as the monolithic 3-line version, but it unlocks massive architectural flexibility:
 
-1. **A/B Testing:** Want to test if Claude 3.5 Sonnet performs better than Gemini 1.5 Flash? Just swap the `llm` module. No other code changes.
-2. **Easy Expansion:** Need to add a Re-ranker? Just add the module, and update two links: `p.add_link("retriever", "reranker")` and `p.add_link("reranker", "format_nodes")`.
-3. **Complex Routing:** You can use `RouterComponent` to create pipelines that fork based on query classification—sending complex questions to an agentic loop, and simple questions to a standard retriever.
+1. **A/B Testing Components:** Want to test if Claude 3.5 Sonnet performs better than Gemini 1.5 Flash? Just pass a different `llm` to the workflow initialization.
+2. **Easy Expansion:** Need to add a Re-ranker? Create a `@step` that listens for `RetrievalEvent`, re-scores the nodes, and emits a `RerankEvent`. Then, simply change the Synthesizer step to listen for `RerankEvent` instead!
+3. **Complex Routing & Loops:** Unlike rigid DAGs, Workflows support loops. You can write a step that evaluates the LLM's answer. If it hallucinates, the step can re-emit a `StartEvent` with a modified query, triggering a self-correcting retry loop.
 
-Modular RAG is not just a technique; it's best practice for taking your GenAI applications from prototype to production. By defining explicit boundaries and data flows, you create systems that are easier to test, debug, and ultimately, scale.
+Modular RAG, powered by LlamaIndex Workflows, is not just a technique; it's best practice for taking your GenAI applications from prototype to production. By defining explicit event boundaries, you create systems that are easier to test, debug, and ultimately, scale.
