@@ -18,6 +18,9 @@ description: "A deep dive into transitioning from rigid RAG implementations to h
 
 In the rapidly evolving world of Large Language Models, the initial approach to Retrieval-Augmented Generation (RAG) was often monolithic. We would load our documents, build a simple index, and let a high-level wrapper handle the rest. While "Naive RAG" is fantastic for prototyping, it becomes a bottleneck as your application scales in complexity.
 
+![Monolith vs. Modular RAG comparison showing the transparent, component-based nature of Modular RAG compared to the black box of Naive RAG.](https://storage.googleapis.com/portfolio-srushanth-baride-images/Modular-RAG-A-Flexible-Pipeline-Architecture/landing-image.png)
+*Figure 1: The "black box" of standard RAG contrasted against the "Lego-brick" style of Modular RAG.*
+
 What happens when you need to swap your vector database? Or introduce a conditionally routing agent? Or build self-correcting loops when retrieval fails?
 
 Enter **Modular RAG**. Modular RAG isn't a single technique; it's an architectural paradigm shift. It breaks the retrieval and generation process into distinct, interoperable modules.
@@ -74,6 +77,9 @@ Let's break this monolith apart using LlamaIndex's event-driven **`Workflows`**.
 
 Instead of blindly feeding documents into an index, we explicitly define our parsing logic. This gives us the flexibility to implement custom semantic chunking, add metadata extractors, or filter nodes before they ever reach the vector database.
 
+![A single document getting "shredded" into smart, metadata-rich nodes.](https://storage.googleapis.com/portfolio-srushanth-baride-images/Modular-RAG-A-Flexible-Pipeline-Architecture/Explicit-Ingestion-and-Indexing.png)
+*Figure 2: Illustrating how a document is processed into intelligent nodes before indexing.*
+
 ```python
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
@@ -109,6 +115,9 @@ class RetrievalEvent(Event):
 ## 3. Orchestrating with Workflows
 
 This is the heart of modern Modular RAG. We create a class inheriting from `Workflow` and use the `@step` decorator to define isolated modules that listen for and emit specific events.
+
+![An architectural diagram showing the pub-sub nature of LlamaIndex Workflows, where steps interact via Events.](https://storage.googleapis.com/portfolio-srushanth-baride-images/Modular-RAG-A-Flexible-Pipeline-Architecture/Orchestration-with-Workflows.png)
+*Figure 3: Reinforcing the "pub-sub" nature of LlamaIndex Workflows—where one step "shouts" an event and another "listens."*
 
 ```python
 from llama_index.core.workflow import Workflow, StartEvent, StopEvent, step
@@ -178,5 +187,8 @@ The code above achieves the exact same result as the monolithic 3-line version, 
 1. **A/B Testing Components:** Want to test if Claude 3.5 Sonnet performs better than Gemini 1.5 Flash? Just pass a different `llm` to the workflow initialization.
 2. **Easy Expansion:** Need to add a Re-ranker? Create a `@step` that listens for `RetrievalEvent`, re-scores the nodes, and emits a `RerankEvent`. Then, simply change the Synthesizer step to listen for `RerankEvent` instead!
 3. **Complex Routing & Loops:** Unlike rigid DAGs, Workflows support loops. You can write a step that evaluates the LLM's answer. If it hallucinates, the step can re-emit a `StartEvent` with a modified query, triggering a self-correcting retry loop.
+
+![Diagram showing a non-linear Workflow with a self-correcting loop when retrieval is insufficient.](https://storage.googleapis.com/portfolio-srushanth-baride-images/Modular-RAG-A-Flexible-Pipeline-Architecture/Why-Event-Driven-Modular-RAG-Matters.png)
+*Figure 4: A self-correcting loop—highlighting the non-linear nature of Workflows that allows the system to "go back" if the retrieval isn't good enough.*
 
 Modular RAG, powered by LlamaIndex Workflows, is not just a technique; it's best practice for taking your GenAI applications from prototype to production. By defining explicit event boundaries, you create systems that are easier to test, debug, and ultimately, scale.
