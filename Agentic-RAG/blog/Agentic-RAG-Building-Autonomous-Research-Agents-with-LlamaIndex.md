@@ -24,6 +24,8 @@ This is where **Agentic RAG** comes in. By upgrading our pipeline to an **Agent*
 
 The core engine powering many of these autonomous systems is the **ReAct (Reasoning and Acting)** framework. Instead of a linear flow, a ReAct agent operates in a continuous loop:
 
+![The ReAct Loop](https://storage.googleapis.com/portfolio-srushanth-baride-images/Agentic-RAG-Building-Autonomous-Research-Agents/The-ReAct-Reasoning-and-Acting-Loop.png)
+
 1. **Thought**: The agent analyzes the query and decides on a plan.
 2. **Action**: The agent selects a specific tool (e.g., a query engine, a web search API, or a calculator) and provides it with parameters.
 3. **Observation**: The agent reads the output of the tool.
@@ -82,6 +84,8 @@ query_engine = index.as_query_engine(similarity_top_k=3)
 
 To make our query engine accessible to the agent, we must wrap it in a `QueryEngineTool`. This is a critical step: we must provide a precise `description`. The agent relies entirely on this metadata to understand _when_ and _why_ it should use this specific tool.
 
+![Packaging the Query Engine](https://storage.googleapis.com/portfolio-srushanth-baride-images/Agentic-RAG-Building-Autonomous-Research-Agents/Packaging-the-Query-Engine.png)
+
 ```python
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 
@@ -135,6 +139,8 @@ The LLM analyzed the query, matched it to the `modular_rag_blog_post` tool's des
 ## The Power of Agency
 
 While our example uses a single tool, the true power of Agentic RAG unlocks when you provide the agent with a diverse toolkit:
+
+![The Agentic Toolkit](https://storage.googleapis.com/portfolio-srushanth-baride-images/Agentic-RAG-Building-Autonomous-Research-Agents/The-Agentic-Toolkit.png)
 
 - **Multiple Query Engines:** Routing between distinct knowledge bases.
 - **Web Search APIs:** Falling back to the public internet if internal retrieval fails.
